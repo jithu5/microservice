@@ -7,8 +7,19 @@ spring:
     config:
       server:
         native:
-          search-locations: classpath:/config
+          search-locations: file:///C:/Users/ABIJITH/Desktop/microservice/configserver/src/main/resources/config
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
 
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "refresh,busrefresh"
 
 server:
   port: 8888

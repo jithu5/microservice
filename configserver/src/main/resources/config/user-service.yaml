@@ -1,9 +1,0 @@
-
-spring:
-  data:
-    mongodb:
-      uri: ${DB_URI}
-      database: userdb
-
-server:
-  port: 8082
