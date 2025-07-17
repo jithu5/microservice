@@ -1,9 +1,11 @@
 package com.ecommerce.ordeer.service;
 
 import com.ecommerce.ordeer.clients.ProductServiceClient;
+import com.ecommerce.ordeer.clients.UserServiceClient;
 import com.ecommerce.ordeer.dto.CartItemReqDto;
 import com.ecommerce.ordeer.dto.CartItemResDto;
 import com.ecommerce.ordeer.dto.ProductResDto;
+import com.ecommerce.ordeer.dto.UserResDto;
 import com.ecommerce.ordeer.entity.CartItem;
 import com.ecommerce.ordeer.repository.CartItemRepo;
 import jakarta.transaction.Transactional;
@@ -24,23 +26,23 @@ public class CartService {
     private static final Logger log = LoggerFactory.getLogger(CartService.class);
     private final CartItemRepo cartItemRepo;
     private final ProductServiceClient productServiceClient;
+    private final UserServiceClient userServiceClient;
 
     public void addToCart(String userId, CartItemReqDto cartItemReqDto) {
-
-//        Optional<User> userOpt = userRepo.findById(Long.valueOf(userId));
-//        if (userOpt.isEmpty()) {
-//            throw new RuntimeException("user not found");
-//        }
-//        User user = userOpt.get();
          Optional<ProductResDto> productOpt = productServiceClient.getProductById(String.valueOf(cartItemReqDto.getProductId()));
 
          if (productOpt.isEmpty()) {
              throw new RuntimeException("product not found");
          }
+
         ProductResDto product = productOpt.get();
         if (product.getQuantity() < cartItemReqDto.getQuantity())
             throw new RuntimeException("product quantity less than quantity");
-
+        Optional<UserResDto> userOpt = userServiceClient.getUserById(userId);
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("user not found");
+        }
+        UserResDto user = userOpt.get();
         CartItem existingCartItem = cartItemRepo.findByUserIdAndProductId(userId, String.valueOf(cartItemReqDto.getProductId()));
         if (existingCartItem == null) {
             // create
@@ -79,7 +81,10 @@ public class CartService {
     public List<CartItemResDto> findCartByUserId(String userId) {
 //        User user = userRepo.findById(Long.valueOf(userId))
 //                .orElseThrow(() -> new RuntimeException("user not found"));
-
+        Optional<UserResDto> userOpt = userServiceClient.getUserById(userId);
+        if (userOpt.isEmpty()) {
+            throw new RuntimeException("user not found");
+        }
         List<CartItem> cartItems = cartItemRepo.findByUserId(userId);
         log.info("cartItems size: {}", cartItems.size());
         return cartItems.stream().map(this::mapCartItemToResDto).toList();

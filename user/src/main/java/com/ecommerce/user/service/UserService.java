@@ -68,8 +68,8 @@ public class UserService {
         userRepo.save(user1);
     }
 
-    public Optional<UserResDto> getUserById(String id) {
-        return userRepo.findById(id).map(this::mapUsersToUserResDto);
+    public UserResDto getUserById(String id) {
+        return userRepo.findById(id).map(this::mapUsersToUserResDto).orElse(null);
     }
 
     public boolean updateUserById(String id, UserReqDtos updatingUser) {
