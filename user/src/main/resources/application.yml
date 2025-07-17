@@ -3,3 +3,5 @@ spring:
     name: user
   config:
     import: optional:configserver:http://localhost:8888
+
+
