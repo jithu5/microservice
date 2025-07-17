@@ -1,7 +1,9 @@
 package com.ecommerce.ordeer.service;
 
+import com.ecommerce.ordeer.clients.ProductServiceClient;
 import com.ecommerce.ordeer.dto.CartItemReqDto;
 import com.ecommerce.ordeer.dto.CartItemResDto;
+import com.ecommerce.ordeer.dto.ProductResDto;
 import com.ecommerce.ordeer.entity.CartItem;
 import com.ecommerce.ordeer.repository.CartItemRepo;
 import jakarta.transaction.Transactional;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -20,22 +23,23 @@ public class CartService {
 
     private static final Logger log = LoggerFactory.getLogger(CartService.class);
     private final CartItemRepo cartItemRepo;
+    private final ProductServiceClient productServiceClient;
 
     public void addToCart(String userId, CartItemReqDto cartItemReqDto) {
 
-//        Optional<Product> productOpt = productRepo.findById(cartItemReqDto.getProductId());
-//        if (productOpt.isEmpty()) {
-//            throw new RuntimeException("product not found");
-//        }
-//        Product product = productOpt.get();
-//        if (product.getQuantity() < cartItemReqDto.getQuantity())
-//            throw new RuntimeException("product quantity less than quantity");
-//
 //        Optional<User> userOpt = userRepo.findById(Long.valueOf(userId));
 //        if (userOpt.isEmpty()) {
 //            throw new RuntimeException("user not found");
 //        }
 //        User user = userOpt.get();
+         Optional<ProductResDto> productOpt = productServiceClient.getProductById(String.valueOf(cartItemReqDto.getProductId()));
+
+         if (productOpt.isEmpty()) {
+             throw new RuntimeException("product not found");
+         }
+        ProductResDto product = productOpt.get();
+        if (product.getQuantity() < cartItemReqDto.getQuantity())
+            throw new RuntimeException("product quantity less than quantity");
 
         CartItem existingCartItem = cartItemRepo.findByUserIdAndProductId(userId, String.valueOf(cartItemReqDto.getProductId()));
         if (existingCartItem == null) {
