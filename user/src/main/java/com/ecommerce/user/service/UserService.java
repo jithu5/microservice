@@ -8,6 +8,7 @@ import com.ecommerce.user.entity.Address;
 import com.ecommerce.user.entity.User;
 import com.ecommerce.user.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
@@ -64,6 +66,7 @@ public class UserService {
         address.setZip(user.getAddress().getZip());
 
         user1.setAddress(address);
+        log.info("user created successfully");
 
         userRepo.save(user1);
     }
