@@ -43,9 +43,19 @@ services:
       - ecom
     restart: unless-stopped
 
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin_container
+    ports:
+      - "9411:9411"
+    networks:
+      - ecom
+    restart: unless-stopped
+
 volumes:
   postgres_data:
   pgadmin:
 
 networks:
   ecom:
+    driver: bridge
