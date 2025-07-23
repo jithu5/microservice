@@ -8,6 +8,7 @@ import com.ecommerce.order.dto.ProductResDto;
 import com.ecommerce.order.dto.UserResDto;
 import com.ecommerce.order.entity.CartItem;
 import com.ecommerce.order.repository.CartItemRepo;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ public class CartService {
     private final ProductServiceClient productServiceClient;
     private final UserServiceClient userServiceClient;
 
+    @CircuitBreaker(name = "productService" )
     public void addToCart(String userId, CartItemReqDto cartItemReqDto) {
          Optional<ProductResDto> productOpt = productServiceClient.getProductById(String.valueOf(cartItemReqDto.getProductId()));
 
@@ -36,6 +38,8 @@ public class CartService {
          }
 
         ProductResDto product = productOpt.get();
+         log.info("quantity: {} ", product.getQuantity());
+         log.info("quantity: {} ", cartItemReqDto.getQuantity());
         if (product.getQuantity() < cartItemReqDto.getQuantity())
             throw new RuntimeException("product quantity less than quantity");
         Optional<UserResDto> userOpt = userServiceClient.getUserById(userId);
@@ -59,6 +63,11 @@ public class CartService {
             existingCartItem.setPrice(BigDecimal.valueOf(100.00));
             cartItemRepo.save(existingCartItem);
         }
+    }
+
+    public void fallbackAddToCart(String userId, CartItemReqDto cartItemReqDto) {
+        log.error("fallbackAddToCart called");
+        addToCart(userId,cartItemReqDto);
     }
 
     @Transactional
