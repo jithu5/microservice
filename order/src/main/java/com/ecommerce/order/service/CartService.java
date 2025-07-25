@@ -69,7 +69,7 @@ public class CartService {
                                   CartItemReqDto cartItemReqDto,
                                   Exception exception) {
         log.error("fallbackAddToCart called");
-        throw new RuntimeException("fallbackAddToCart called");
+        throw new RuntimeException("Product Service is not available. Please try again later.");
     }
 
     @Transactional
