@@ -9,6 +9,7 @@ import com.ecommerce.order.dto.UserResDto;
 import com.ecommerce.order.entity.CartItem;
 import com.ecommerce.order.repository.CartItemRepo;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -28,9 +29,12 @@ public class CartService {
     private final CartItemRepo cartItemRepo;
     private final ProductServiceClient productServiceClient;
     private final UserServiceClient userServiceClient;
+    int attempt = 0;
 
-    @CircuitBreaker(name = "productService",fallbackMethod = "fallbackAddToCart" )
+//    @CircuitBreaker(name = "productService",fallbackMethod = "fallbackAddToCart" )
+    @Retry(name = "retryBreaker",fallbackMethod = "fallbackAddToCart")
     public void addToCart(String userId, CartItemReqDto cartItemReqDto) {
+        log.info("addToCart called for attempt "+ ++attempt);
          Optional<ProductResDto> productOpt = productServiceClient.getProductById(String.valueOf(cartItemReqDto.getProductId()));
 
          if (productOpt.isEmpty()) {
