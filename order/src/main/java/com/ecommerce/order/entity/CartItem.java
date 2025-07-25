@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "cart_items")
 @Getter
 @Setter
 @AllArgsConstructor

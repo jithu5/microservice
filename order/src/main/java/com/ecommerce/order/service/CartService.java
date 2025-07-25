@@ -29,7 +29,7 @@ public class CartService {
     private final ProductServiceClient productServiceClient;
     private final UserServiceClient userServiceClient;
 
-    @CircuitBreaker(name = "productService" )
+    @CircuitBreaker(name = "productService",fallbackMethod = "fallbackAddToCart" )
     public void addToCart(String userId, CartItemReqDto cartItemReqDto) {
          Optional<ProductResDto> productOpt = productServiceClient.getProductById(String.valueOf(cartItemReqDto.getProductId()));
 
@@ -65,9 +65,11 @@ public class CartService {
         }
     }
 
-    public void fallbackAddToCart(String userId, CartItemReqDto cartItemReqDto) {
+    public void fallbackAddToCart(String userId,
+                                  CartItemReqDto cartItemReqDto,
+                                  Exception exception) {
         log.error("fallbackAddToCart called");
-        addToCart(userId,cartItemReqDto);
+        throw new RuntimeException("fallbackAddToCart called");
     }
 
     @Transactional
