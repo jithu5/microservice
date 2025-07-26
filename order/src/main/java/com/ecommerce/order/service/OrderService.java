@@ -6,18 +6,23 @@ import com.ecommerce.order.entity.OrderItem;
 import com.ecommerce.order.entity.OrderStatus;
 import com.ecommerce.order.repository.OrderRepo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepo orderRepo;
     private final CartService cartService;
+    private final RabbitTemplate rabbitTemplate;
 
     public void createOrder(String userId) {
         List<CartItemResDto> cartItems = cartService.findCartByUserId(userId);
@@ -56,5 +61,10 @@ public class OrderService {
 
         // clear the cart
         cartService.clearCart(userId);
+        log.info("Cart cleared for user: {}", userId);
+
+        rabbitTemplate.convertAndSend("order.exchange", "order.tracking",
+                Map.of("orderId", order.getId(), "status", "CREATED"));
+        log.info("Order created with id: {}", order.getId());
     }
 }
